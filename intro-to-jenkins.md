@@ -22,7 +22,7 @@
         
     *   New Team Members (specifically learners of this project)
         
-*   **Document Version:** 1.0
+*   **Document Version:** 1.1
     
 *   **Last Updated:** 2025-07-10
     
@@ -63,6 +63,7 @@ The core architecture for this project involves a single Jenkins instance deploy
                                 |   (for builds/    |
                                 |    deployments)   |
                                 +-------------------+
+    
     
 
 ### 2.2 Technology Stack
@@ -136,6 +137,59 @@ The core architecture for this project involves a single Jenkins instance deploy
 *   **File Storage:** Not applicable beyond the local filesystem.
     
 
+### 3.5 Jenkins Installation Steps
+
+Now that we have an idea what Jenkins is, let's dive into installing Jenkins.
+
+1.  **Update package repositories:**
+    
+        sudo apt update
+        
+    
+2.  **Install JDK (Java Development Kit):** Jenkins requires Java to run.
+    
+        sudo apt install default-jdk-headless
+        
+    
+3.  **Install Jenkins:**
+    
+        wget -q -O - https://pkg.jenkins.io/debian-stable/jenkins.io.key | sudo apt-key add -
+        sudo sh -c 'echo deb https://pkg.jenkins.io/debian-stable binary/ > \
+        /etc/apt/sources.list.d/jenkins.list'
+        sudo apt update
+        sudo apt-get install jenkins
+        
+    
+    This command sequence installs Jenkins. It involves importing the Jenkins GPG key for package verification, adding the Jenkins repository to the system's sources, updating package lists, and finally, installing Jenkins through the package manager (`apt-get`).
+    
+4.  **Check if Jenkins has been installed and is up and running:**
+    
+        sudo systemctl status jenkins
+        
+    
+
+### 3.6 Jenkins Web Console Setup
+
+After installation, you need to configure Jenkins through its web interface.
+
+1.  **Create new inbound rules for port 8080 in the security group:** By default, Jenkins listens on port 8080. You need to create an inbound rule for this port in the security group of your Jenkins instance (e.g., in your cloud provider's console or firewall settings) to allow external access.
+    
+2.  **Access Jenkins On The Web Console:** Input your Jenkins Instance IP address on your web browser: `http://public_ip_address:8080`
+    
+3.  **Retrieve Initial Admin Password:** On your Jenkins instance (via SSH), check the following path to find your initial administrator password:
+    
+        sudo cat /var/lib/jenkins/secrets/initialAdminPassword
+        
+    
+    Copy this password and paste it into the Jenkins web interface to unlock Jenkins.
+    
+4.  **Install Suggested Plugins:** After unlocking, Jenkins will prompt you to install suggested plugins. It is recommended to proceed with this option.
+    
+5.  **Create a User Account:** Follow the prompts to create your first admin user account for Jenkins.
+    
+6.  **Log in to Jenkins Console:** Once the setup is complete and the user account is created, you will be redirected to the Jenkins dashboard.
+    
+
 ## 4\. CI/CD Pipeline
 
 ### 4.1 Overview
@@ -184,6 +238,31 @@ The core architecture for this project involves a single Jenkins instance deploy
 *   **Rollback Procedure:** Not explicitly detailed in the provided project description.
     
 *   **Secrets Management:** Initial Jenkins setup involves retrieving an initial admin password. For pipeline secrets (e.g., credentials for deploying), Jenkins' built-in credentials management or plugins would be used, though not explicitly detailed in the provided text.
+    
+
+### 4.5 Pipeline Scripting and Execution
+
+This section details how to define and execute CI/CD pipelines using Jenkins.
+
+*   **Creating a Freestyle Project:** Freestyle projects are a basic type of Jenkins job that allows you to configure build steps, SCM, and post-build actions through the Jenkins UI. This is a good starting point for simple tasks.
+    
+*   **Connecting Jenkins To Our Source Code Management:** To build code, Jenkins needs to connect to your version control system (e.g., Git). You will configure the SCM section in your Jenkins job to point to your repository URL and specify credentials if needed.
+    
+*   **Configuring Build Trigger (Freestyle):** Freestyle projects can be triggered manually, periodically, or by SCM changes (e.g., polling SCM or using webhooks).
+    
+*   **Creating a Pipeline Job:** Pipeline jobs allow you to define your entire CI/CD workflow as code using a `Jenkinsfile`. This provides version control, reusability, and better visibility into your pipeline.
+    
+*   **Configuring Build Trigger (Pipeline):** Similar to Freestyle projects, Pipeline jobs can be triggered manually, periodically, or by SCM changes. The `Jenkinsfile` itself can also define triggers.
+    
+*   **Writing Jenkins Pipeline Script:** A `Jenkinsfile` is a text file that defines your Jenkins Pipeline. It's typically written in Groovy syntax and committed to your project's source code repository. It defines stages like build, test, and deploy.
+    
+*   **Installing Docker (for Pipeline Builds):** To leverage containerization within your Jenkins pipelines (e.g., building Docker images, running tests in isolated containers), Docker needs to be installed on the Jenkins host.
+    
+        # (Assuming Docker installation steps would be provided here if available,
+        # as per the project highlight "Installing Docker")
+        
+    
+*   **Building Pipeline Script:** Once your `Jenkinsfile` is committed to your SCM, you configure a Jenkins Pipeline job to point to this `Jenkinsfile`. When the job runs, Jenkins executes the script, orchestrating your CI/CD workflow.
     
 
 ## 5\. Monitoring and Alerting
