@@ -6,7 +6,7 @@
 
 *   **Project Name:** Introduction to Jenkins for CI/CD
     
-*   **Purpose/Goals:** This project aims to provide learners with a foundational understanding of Continuous Integration (CI) and Continuous Delivery (CD) principles, and to articulate their role in improving software development processes. It focuses on acquiring proficiency in using Jenkins, covering installation, configuration, navigation, and hands-on experience in creating and managing Jenkins jobs and pipelines. The ultimate goal is to enable learners to automate software builds, run automated tests, and deploy applications using Jenkins, while applying CI/CD best practices including parameterized builds, integration with external tools, and leveraging containerization technologies like Docker. **Specifically, this project guides users through creating and configuring Jenkins Freestyle projects, connecting Jenkins to GitHub for Source Code Management, and setting up automated build triggers using webhooks.**
+*   **Purpose/Goals:** This project aims to provide learners with a foundational understanding of Continuous Integration (CI) and Continuous Delivery (CD) principles, and to articulate their role in improving software development processes. It focuses on acquiring proficiency in using Jenkins, covering installation, configuration, navigation, and hands-on experience in creating and managing Jenkins jobs and pipelines. The ultimate goal is to enable learners to automate software builds, run automated tests, and deploy applications using Jenkins, while applying CI/CD best practices including parameterized builds, integration with external tools, and leveraging containerization technologies like Docker. **Specifically, this project guides users through creating and configuring Jenkins Freestyle projects, connecting Jenkins to GitHub for Source Code Management, setting up automated build triggers using webhooks, and then extends to creating and executing Jenkins Pipeline jobs for containerized applications.**
     
 *   **Scope:** This documentation covers the theoretical introduction to CI/CD and Jenkins, practical steps for Jenkins installation and initial setup, creation and configuration of Jenkins Freestyle and Pipeline jobs, connecting Jenkins to Source Code Management, configuring build triggers, writing Jenkins Pipeline scripts, and integrating Docker into the pipeline.
     
@@ -22,7 +22,7 @@
         
     *   New Team Members (specifically learners of this project)
         
-*   **Document Version:** 1.2
+*   **Document Version:** 1.3
     
 *   **Last Updated:** 2025-07-10
     
@@ -63,6 +63,7 @@ The core architecture for this project involves a single Jenkins instance deploy
                                 |   (for builds/    |
                                 |    deployments)   |
                                 +-------------------+
+    
     
 
 ### 2.2 Technology Stack
@@ -309,29 +310,217 @@ As an engineer, we need to be able to automate things and make our work easier i
     Now, go ahead and make some change in any file in your GitHub repository (e.g., `README.MD` file) and push the changes to the `main` branch. You will see that a new build has been launched automatically (triggered by the webhook).
     
 
-#### 4.5.5 Creating a Pipeline Job
+#### 4.5.5 What is a Jenkins Pipeline Job
 
-Pipeline jobs allow you to define your entire CI/CD workflow as code using a `Jenkinsfile`. This provides version control, reusability, and better visibility into your pipeline.
+A Jenkins pipeline job is a way to define and automate a series of steps in the software delivery process. It allows you to script and organize your entire build, test, and deployment. Jenkins pipelines enable organizations to define, visualize, and execute intricate build, test, and deployment processes as code. This facilitates the seamless integration of continuous integration and continuous delivery (CI/CD) practices into software development.
 
-#### 4.5.6 Configuring Build Trigger (Pipeline)
+#### 4.5.6 Creating a Pipeline Job
 
-Similar to Freestyle projects, Pipeline jobs can be triggered manually, periodically, or by SCM changes. The `Jenkinsfile` itself can also define triggers.
+Let's create our first pipeline job:
 
-#### 4.5.7 Writing Jenkins Pipeline Script
-
-A `Jenkinsfile` is a text file that defines your Jenkins Pipeline. It's typically written in Groovy syntax and committed to your project's source code repository. It defines stages like build, test, and deploy.
-
-#### 4.5.8 Installing Docker (for Pipeline Builds)
-
-To leverage containerization within your Jenkins pipelines (e.g., building Docker images, running tests in isolated containers), Docker needs to be installed on the Jenkins host.
-
-    # (Specific Docker installation steps would be provided here if available,
-    # as per the project highlight "Installing Docker")
+1.  From the Jenkins dashboard menu on the left side, click on **"New Item"**.
+    
+2.  Select **"Pipeline"** and name it `My pipeline job`. Click **"OK"**.
     
 
-#### 4.5.9 Building Pipeline Script
+#### 4.5.7 Configuring Build Trigger (Pipeline)
 
-Once your `Jenkinsfile` is committed to your SCM, you configure a Jenkins Pipeline job to point to this `Jenkinsfile`. When the job runs, Jenkins executes the script, orchestrating your CI/CD workflow.
+Like we did previously in the earlier project, create a build trigger for Jenkins to trigger new builds for your Pipeline job.
+
+1.  Click **"Configure"** for your `My pipeline job`.
+    
+2.  Navigate to the **"Build Triggers"** section.
+    
+3.  Check the option **"GitHub hook trigger for GITScm polling"**.
+    
+4.  Save the job configuration. Since you have already created a GitHub webhook previously for the `jenkins-scm` repository, you do not need to create another one again. Changes pushed to `jenkins-scm` will now trigger this pipeline job as well.
+    
+
+#### 4.5.8 Writing Jenkins Pipeline Script
+
+A Jenkins pipeline script refers to a script that defines and orchestrates the steps and stages of a continuous integration and continuous delivery (CI/CD) pipeline. Jenkins pipelines can be defined using either declarative or scripted syntax. Declarative syntax is a more structured and concise way to define pipelines. It uses a domain-specific language to describe the pipeline stages, steps, and other configurations while scripted syntax provides more flexibility and is suitable for complex scripting requirements.
+
+Let's write our pipeline script (Declarative Pipeline):
+
+    pipeline {
+        agent any
+    
+        stages {
+            stage('Connect To Github') {
+                steps {
+                        checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/RidwanAz/jenkins-scm.git']])
+                }
+            }
+            stage('Build Docker Image') {
+                steps {
+                    script {
+                        sh 'docker build -t dockerfile .'
+                    }
+                }
+            }
+            stage('Run Docker Container') {
+                steps {
+                    script {
+                        sh 'docker run -itd --name nginx -p 8081:80 dockerfile'
+                    }
+                }
+            }
+        }
+    }
+    
+
+**Explanation of the script above:**
+
+The provided Jenkins pipeline script defines a series of stages for a continuous integration and continuous delivery (CI/CD) process. Let's break down each stage:
+
+*   **Agent Configuration:**
+    
+        agent any
+        
+    
+    Specifies that the pipeline can run on any available agent (an agent can either be a Jenkins master or node). This means the pipeline is not tied to a specific node type.
+    
+*   **Stages:**
+    
+        stages {
+            // Stages go here
+        }
+        
+    
+    Defines the various stages of the pipeline, each representing a phase in the software delivery process.
+    
+*   **Stage 1: Connect To Github:**
+    
+        stage('Connect To Github') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/RidwanAz/jenkins-scm.git']])
+            }
+        }
+        
+    
+    This stage checks out the source code from a GitHub repository (`https://github.com/RidwanAz/jenkins-scm.git`). It specifies that the pipeline should use the `main` branch.
+    
+*   **Stage 2: Build Docker Image:**
+    
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh 'docker build -t dockerfile .'
+                }
+            }
+        }
+        
+    
+    This stage builds a Docker image named `dockerfile` using the source code obtained from the GitHub repository. The `docker build` command is executed using the shell (`sh`).
+    
+*   **Stage 3: Run Docker Container:**
+    
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh 'docker run -itd --name nginx -p 8081:80 dockerfile'
+                }
+            }
+        }
+        
+    
+    This stage runs a Docker container named `nginx` in detached mode (`-itd`). The container is mapped to port 8081 on the host machine (`-p 8081:80`). The Docker image used is the one built in the previous stage (`dockerfile`).
+    
+
+**To paste the pipeline script:** In your `My pipeline job` configuration, navigate to the **"Pipeline"** section. Select "Pipeline script" from the "Definition" dropdown and paste the entire script above into the "Script" text area.
+
+#### 4.5.9 Generating Pipeline Syntax
+
+The stage 1 of the script connects Jenkins to a GitHub repository. To generate syntax for your GitHub repository (e.g., for `checkout` step), follow the steps below:
+
+1.  In your Jenkins Pipeline job configuration, click on **"Pipeline Syntax"** (usually found below the "Script" text area).
+    
+2.  Select the dropdown for "Sample Step" and search for `checkout: Check out from version control`.
+    
+3.  Choose **"Git"** as the SCM.
+    
+4.  Paste your repository URL (e.g., `https://github.com/RidwanAz/jenkins-scm.git`) into the "Repository URL" field.
+    
+5.  Make sure your branch is `main` (or `master`).
+    
+6.  Click **"Generate Pipeline Script"**.
+    
+
+Now you can replace the generated script for connecting Jenkins with GitHub in your `Jenkinsfile` if you need to customize it.
+
+#### 4.5.10 Installing Docker
+
+Before Jenkins can run Docker commands, you need to install Docker on the same instance where Jenkins was installed. From our shell scripting knowledge, let's install Docker with a shell script.
+
+1.  Create a file named `docker.sh` on your Jenkins instance.
+    
+2.  Open the file and paste the script below:
+    
+        sudo apt-get update -y
+        sudo apt-get install ca-certificates curl gnupg -y
+        sudo install -m 0755 -d /etc/apt/keyrings
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        sudo chmod a+r /etc/apt/keyrings/docker.gpg
+        
+        # Add the repository to Apt sources:
+        echo \
+          "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+          sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        sudo apt-get update -y
+        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+        sudo systemctl status docker
+        
+    
+3.  Save and close the file.
+    
+4.  Make the file executable:
+    
+        chmod u+x docker.sh
+        
+    
+5.  Execute the file:
+    
+        ./docker.sh
+        
+    
+    You have successfully installed Docker.
+    
+
+#### 4.5.11 Building Pipeline Script (Dockerfile and index.html)
+
+Now that you have Docker installed on the same instance as Jenkins, you need to create a `Dockerfile` and an `index.html` file in your `jenkins-scm` GitHub repository before you can run your pipeline script. As we know, you cannot build a Docker image without a `Dockerfile`. Let's recall the `Dockerfile` we used to build a Docker image in our Docker foundations.
+
+In the `main` branch of your `jenkins-scm` GitHub repository:
+
+1.  Create a new file named `Dockerfile`.
+    
+2.  Paste the code snippet below into the file:
+    
+        # Use the official NGINX base image
+        FROM nginx:latest
+        
+        # Set the working directory in the container
+        WORKDIR  /usr/share/nginx/html/
+        
+        # Copy the local HTML file to the NGINX default public directory
+        COPY index.html /usr/share/nginx/html/
+        
+        # Expose port 80 to allow external access
+        EXPOSE 80
+        
+    
+3.  Create an `index.html` file in the same repository and paste the content below:
+    
+        Congratulations, You have successfully run your first pipeline code.
+        
+    
+4.  Pushing these files (`Dockerfile` and `index.html`) to the `main` branch will trigger Jenkins to automatically run a new build for your pipeline job (due to the webhook configured earlier).
+    
+
+To access the content of `index.html` on your web browser, you need to first edit inbound rules in your Jenkins instance's security group and open the port you mapped your container to (8081).
+
+You can now access the content of `index.html` on your web browser: `http://jenkins-ip-address:8081`
 
 ## 5\. Monitoring and Alerting
 
@@ -480,14 +669,6 @@ Once your `Jenkinsfile` is committed to your SCM, you configure a Jenkins Pipeli
     *   Git Documentation
         
 *   **Communication Channels:** N/A (for a self-paced project).
-
-## Screenshots
-
-<img width="700" alt="Snipaste_2025-07-10_09-25-50" src="https://github.com/user-attachments/assets/8e42f97c-c116-48fc-9fd6-0ed89fadb9e2" />
-
-
-<img width="1115" alt="Snipaste_2025-07-10_09-28-07" src="https://github.com/user-attachments/assets/a19c15b8-44c2-4116-abe1-f71009b55354" />
-
     
 
 ## 11\. Future Considerations / Roadmap
@@ -546,3 +727,13 @@ Once your `Jenkinsfile` is committed to your SCM, you configure a Jenkins Pipeli
 *   Docker Official Website: [https://www.docker.com/](https://www.docker.com/ "null")
     
 *   Git Official Website: [https://git-scm.com/](https://git-scm.com/ "null")
+
+## Screenshots
+
+<img width="700" alt="Snipaste_2025-07-10_09-25-50" src="https://github.com/user-attachments/assets/8e42f97c-c116-48fc-9fd6-0ed89fadb9e2" />
+
+
+<img width="1115" alt="Snipaste_2025-07-10_09-28-07" src="https://github.com/user-attachments/assets/a19c15b8-44c2-4116-abe1-f71009b55354" />
+
+    
+
