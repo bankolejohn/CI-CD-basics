@@ -429,6 +429,18 @@ This section details how to define and execute CI/CD pipelines using Jenkins.
     *   Automating Jenkins installation and configuration using IaC tools (e.g., Ansible, Terraform).
         
 *   **Technical Debt:** N/A (for a learning project).
+
+
+## Screenshots
+
+<img width="1115" alt="Snipaste_2025-07-10_09-28-07" src="https://github.com/user-attachments/assets/915c0e01-b5b0-4152-b500-4879b3b7ddb3" />
+
+
+<img width="700" alt="Snipaste_2025-07-10_09-25-50" src="https://github.com/user-attachments/assets/6d0e552e-2e58-4c34-ab32-ae5c9f12f095" />
+
+
+<img width="491" alt="Snipaste_2025-07-10_09-25-04" src="https://github.com/user-attachments/assets/3104c541-ba9c-4a07-b3e1-b3f5ed9ee4b9" />
+
     
 
 ## 12\. Appendices
