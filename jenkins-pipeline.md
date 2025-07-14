@@ -688,6 +688,16 @@ You can now access the content of `index.html` on your web browser: `http://jenk
 
 ## Screenshots
 
+<img width="1030" height="692" alt="Screenshot 2025-07-14 at 4 01 17 PM" src="https://github.com/user-attachments/assets/2a5edadd-f5b7-4bfe-8247-131f2b03dcc2" />
+
+
+<img width="1030" height="692" alt="Screenshot 2025-07-14 at 4 01 17 PM" src="https://github.com/user-attachments/assets/31dec110-3217-430f-a922-7b9512005c64" />
+
+
+<img width="1011" height="675" alt="Snipaste_2025-07-14_16-05-16" src="https://github.com/user-attachments/assets/e6246b2d-dec5-4cb3-b61d-dfdf634ebdc1" />
+
+
+
 <img width="579" alt="Snipaste_2025-07-10_10-53-24" src="https://github.com/user-attachments/assets/259f3a29-70dd-471d-9afb-2b751fac248c" />
 
 
