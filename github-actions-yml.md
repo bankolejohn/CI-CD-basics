@@ -2,7 +2,7 @@
 
 * * *
 
-## Revised Project Submission: GitHub Actions CI/CD for Node.js (YAML)
+## Project Submission: GitHub Actions CI/CD for Node.js (YAML)
 
 **Project Goal:** To provide a single, functional `.github/workflows/main.yml` YAML file that demonstrates Continuous Integration and Continuous Deployment (CI/CD) practices for a Node.js web application using GitHub Actions, showcasing configurations for building, testing, deploying, environment variables, conditional execution, and matrix builds.
 
